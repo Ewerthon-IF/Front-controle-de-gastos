@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Button, Dropdown, Input, Message, Form as UIForm } from 'semantic-ui-react';
+import { Button, Dropdown, Input, Message, Segment, Form as UIForm } from 'semantic-ui-react';
 
-const Form = () => {
+const FormEstoque = ({ tipo }) => {
   const [form, setForm] = useState({
     telha_id: '',
     quantidade: '',
@@ -12,51 +12,70 @@ const Form = () => {
   const [mensagem, setMensagem] = useState('');
   const [regioes, setRegioes] = useState([]);
   const [telhas, setTelhas] = useState([]);
-  const [precoCompra, setPrecoCompra] = useState(null);
-  const [precoRevenda, setPrecoRevenda] = useState(null);
+  const [preco, setPreco] = useState(null);
+  const [investimentos, setInvestimentos] = useState([]);
 
   useEffect(() => {
-    // Buscar regiões
     axios.get('http://localhost:3001/regioes')
       .then(res => setRegioes(res.data))
       .catch(() => setRegioes([]));
   }, []);
 
   useEffect(() => {
-    if (form.regiao_id) {
-      // Buscar telhas de revenda por região
+    if (tipo === 'investimento') {
+      axios.get('http://localhost:3001/investimentos')
+        .then(res => setTelhas(res.data))
+        .catch(() => setTelhas([]));
+    } else if (form.regiao_id) {
       axios.get(`http://localhost:3001/revenda/regiao/${form.regiao_id}`)
         .then(res => setTelhas(res.data))
         .catch(() => setTelhas([]));
     } else {
       setTelhas([]);
     }
-  }, [form.regiao_id]);
+  }, [form.regiao_id, tipo]);
 
   useEffect(() => {
     if (form.telha_id) {
       const telha = telhas.find(t => String(t.id) === String(form.telha_id));
-      setPrecoCompra(null); // Não há preco_compra direto na revenda
-      setPrecoRevenda(telha?.preco_revenda || null);
+      if (tipo === 'investimento') {
+        setPreco(telha?.preco_compra || null);
+      } else {
+        setPreco(telha?.preco_revenda || null);
+      }
     } else {
-      setPrecoCompra(null);
-      setPrecoRevenda(null);
+      setPreco(null);
     }
-  }, [form.telha_id, telhas]);
+  }, [form.telha_id, telhas, tipo]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleDropdownChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const telhaSelecionada = telhas.find(t => String(t.id) === String(form.telha_id));
-    if (!telhaSelecionada) {
-      setMensagem('Telha não encontrada');
+
+    const revendaSelecionada = telhas.find(t => String(t.id) === String(form.telha_id));
+    if (!revendaSelecionada) {
+      setMensagem('Telha de revenda não encontrada');
       return;
     }
+
+    const investimento = await axios.get('http://localhost:3001/investimentos')
+      .then(res => res.data.find(i =>
+        i.nome_telha === revendaSelecionada.nome_telha &&
+        i.cor === revendaSelecionada.cor &&
+        i.comprimento === revendaSelecionada.comprimento &&
+        i.largura === revendaSelecionada.largura
+      ));
     const payload = {
-      telha_id: telhaSelecionada.id, // Corrigido: envia o id da telha de revenda
+      id: revendaSelecionada.id, 
+      regiao_id: form.regiao_id, 
+      telha_id: investimento ? investimento.telha_id : revendaSelecionada.telha_id,
       quantidade: Number(form.quantidade)
     };
     try {
@@ -67,7 +86,6 @@ const Form = () => {
     }
   };
 
-  // Gerar opções para o Dropdown do Semantic UI
   const regiaoOptions = regioes.map(r => ({
     key: r.regiao_id || r.id,
     value: r.regiao_id || r.id,
@@ -76,19 +94,20 @@ const Form = () => {
   const telhaOptions = telhas.map(t => ({
     key: t.id,
     value: t.id,
-    text: `${t.nome_telha} - ${t.comprimento}x${t.largura} - ${t.cor}`
+    text: `${t.nome_telha} - ${t.comprimento} x ${t.largura} - ${t.cor}`
   }));
 
   return (
-    <>
-      {precoRevenda !== null && (
+        <Segment style={{maxWidth: 400, margin: '2rem auto', background: '#f9fafb', borderRadius: 8, boxShadow: '0 2px 8px #0001', backgroundColor: 'black'}}>
+      {preco !== null && (
         <Message info>
-          Preço de revenda: R$ {Number(precoRevenda).toFixed(2)}
+          {tipo === 'investimento' ? 'Preço de compra: R$ ' : 'Preço de revenda: R$ '}
+          {Number(preco).toFixed(2)}
         </Message>
       )}
       <UIForm onSubmit={handleSubmit} style={{maxWidth: 400, margin: '0 auto'}}>
         <UIForm.Field required>
-          <label>Região</label>
+          <label style={{color: 'white'}}>Região</label>
           <Dropdown
             placeholder="Selecione a Região"
             fluid
@@ -96,11 +115,11 @@ const Form = () => {
             options={regiaoOptions}
             name="regiao_id"
             value={form.regiao_id}
-            onChange={(_, data) => handleChange({ target: { name: 'regiao_id', value: data.value } })}
+            onChange={(_, data) => handleDropdownChange('regiao_id', data.value)}
           />
         </UIForm.Field>
         <UIForm.Field required>
-          <label>Telha</label>
+          <label style={{color: 'white'}}>Telha</label>
           <Dropdown
             placeholder="Selecione a Telha"
             fluid
@@ -108,12 +127,12 @@ const Form = () => {
             options={telhaOptions}
             name="telha_id"
             value={form.telha_id}
-            onChange={(_, data) => handleChange({ target: { name: 'telha_id', value: data.value } })}
+            onChange={(_, data) => handleDropdownChange('telha_id', data.value)}
             disabled={!form.regiao_id}
           />
         </UIForm.Field>
         <UIForm.Field required>
-          <label>Quantidade</label>
+          <label style={{color: 'white'}}>Quantidade</label>
           <Input
             name="quantidade"
             type="number"
@@ -123,11 +142,13 @@ const Form = () => {
             min={1}
           />
         </UIForm.Field>
-        <Button primary type="submit">Atualizar Estoque de Revenda</Button>
+        <Button primary type="submit">
+          {tipo === 'investimento' ? 'Atualizar Estoque de Investimento' : 'Atualizar Estoque de Revenda'}
+        </Button>
         {mensagem && <Message content={mensagem} />}
       </UIForm>
-    </>
+    </Segment>
   );
 };
 
-export default Form;
+export default FormEstoque;

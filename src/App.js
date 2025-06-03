@@ -1,22 +1,24 @@
-import logo from './logo.svg';
 import './App.css';
+import FormEstoque from './views/cadastroTelhas/FormEstoque';
+import FormInvestimentoEstoque from './views/cadastroTelhas/FormInvestimentoEstoque';
+import InvestimentosList from './views/cadastroTelhas/InvestimentosList';
+import RevendasList from './views/cadastroTelhas/RevendasList';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h2>Cadastro e Atualização de Estoque de Telhas</h2>
+        <div style={{maxWidth: 900, margin: '2rem auto'}}>
+          <InvestimentosList />
+        </div>
+        <div style={{maxWidth: 1000, margin: '2rem auto',  color: '#333'}}>
+          <RevendasList />
+        </div>
+        <div style={{display: 'flex', gap: '40px', flexWrap: 'wrap', justifyContent: 'center', color: '#333'}}>
+          <FormEstoque tipo="revenda" />
+          <FormInvestimentoEstoque />
+        </div>
       </header>
     </div>
   );
