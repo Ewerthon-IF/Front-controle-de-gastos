@@ -13,7 +13,6 @@ const FormEstoque = ({ tipo }) => {
   const [regioes, setRegioes] = useState([]);
   const [telhas, setTelhas] = useState([]);
   const [preco, setPreco] = useState(null);
-  const [investimentos, setInvestimentos] = useState([]);
 
   useEffect(() => {
     axios.get('http://localhost:3001/regioes')
@@ -58,28 +57,18 @@ const FormEstoque = ({ tipo }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const revendaSelecionada = telhas.find(t => String(t.id) === String(form.telha_id));
-    if (!revendaSelecionada) {
-      setMensagem('Telha de revenda não encontrada');
+    // O id correto para atualizar investimentos é o telha_id da tabela investimentos
+    const telhaSelecionada = telhas.find(t => String(t.telha_id || t.id) === String(form.telha_id));
+    if (!telhaSelecionada) {
+      setMensagem('Telha não encontrada');
       return;
     }
-
-    const investimento = await axios.get('http://localhost:3001/investimentos')
-      .then(res => res.data.find(i =>
-        i.nome_telha === revendaSelecionada.nome_telha &&
-        i.cor === revendaSelecionada.cor &&
-        i.comprimento === revendaSelecionada.comprimento &&
-        i.largura === revendaSelecionada.largura
-      ));
     const payload = {
-      id: revendaSelecionada.id, 
-      regiao_id: form.regiao_id, 
-      telha_id: investimento ? investimento.telha_id : revendaSelecionada.telha_id,
+      telha_id: telhaSelecionada.telha_id || telhaSelecionada.id,
       quantidade: Number(form.quantidade)
     };
     try {
-      const res = await axios.patch('http://localhost:3001/revenda/quantidade', payload);
+      const res = await axios.patch('http://localhost:3001/investimentos/quantidade', payload);
       setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
     } catch (err) {
       setMensagem('Erro ao atualizar estoque');
@@ -92,22 +81,21 @@ const FormEstoque = ({ tipo }) => {
     text: r.nome
   }));
   const telhaOptions = telhas.map(t => ({
-    key: t.id,
-    value: t.id,
+    key: t.telha_id || t.id,
+    value: t.telha_id || t.id,
     text: `${t.nome_telha} - ${t.comprimento} x ${t.largura} - ${t.cor}`
   }));
-
   return (
-        <Segment style={{maxWidth: 400, margin: '2rem auto', background: '#f9fafb', borderRadius: 8, boxShadow: '0 2px 8px #0001', backgroundColor: 'black'}}>
+    <Segment style={{ maxWidth: 400, margin: '2rem auto', background: '#f9fafb', borderRadius: 8, boxShadow: '0 2px 8px #0001', backgroundColor: 'black' }}>
       {preco !== null && (
         <Message info>
           {tipo === 'investimento' ? 'Preço de compra: R$ ' : 'Preço de revenda: R$ '}
           {Number(preco).toFixed(2)}
         </Message>
       )}
-      <UIForm onSubmit={handleSubmit} style={{maxWidth: 400, margin: '0 auto'}}>
+      <UIForm onSubmit={handleSubmit} style={{ maxWidth: 400, margin: '0 auto' }}>
         <UIForm.Field required>
-          <label style={{color: 'white'}}>Região</label>
+          <label style={{ color: 'white' }}>Região</label>
           <Dropdown
             placeholder="Selecione a Região"
             fluid
@@ -119,7 +107,7 @@ const FormEstoque = ({ tipo }) => {
           />
         </UIForm.Field>
         <UIForm.Field required>
-          <label style={{color: 'white'}}>Telha</label>
+          <label style={{ color: 'white' }}>Telha</label>
           <Dropdown
             placeholder="Selecione a Telha"
             fluid
@@ -132,7 +120,7 @@ const FormEstoque = ({ tipo }) => {
           />
         </UIForm.Field>
         <UIForm.Field required>
-          <label style={{color: 'white'}}>Quantidade</label>
+          <label style={{ color: 'white' }}>Quantidade</label>
           <Input
             name="quantidade"
             type="number"

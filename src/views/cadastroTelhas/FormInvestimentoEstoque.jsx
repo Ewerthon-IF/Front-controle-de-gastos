@@ -32,11 +32,11 @@ const FormInvestimentoEstoque = () => {
       return;
     }
     try {
-      const res = await axios.patch('http://localhost:3001/investimentos/quantidade', {
+      await axios.patch('http://localhost:3001/investimentos/quantidade', {
         telha_id: telhaId,
         quantidade: Number(quantidade)
       });
-      setMensagem(res.data.mensagem || 'Estoque de investimento atualizado com sucesso!');
+      setMensagem('Estoque de investimento atualizado com sucesso!');
       setAtualizar(a => !a);
       setQuantidade('');
     } catch (err) {

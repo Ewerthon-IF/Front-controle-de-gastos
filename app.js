@@ -71,11 +71,11 @@ app.patch('/revenda/quantidade', (req, res) => {
         [quantidade, telha_id],
         (err2, result2) => {
           if (err2) return res.status(500).json({ mensagem: 'Erro ao atualizar estoque de investimento' });
-          res.json({ mensagem: 'Estoque de revenda e investimento atualizado com sucesso!' });
+              res.json({ mensagem: 'Estoque de revenda e investimento atualizado com sucesso!' });
+            }
+          );
         }
       );
-    }
-  );
 });
 
 // GET /investimentos
