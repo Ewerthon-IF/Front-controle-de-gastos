@@ -55,25 +55,24 @@ const FormEstoque = ({ tipo }) => {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // O id correto para atualizar investimentos é o telha_id da tabela investimentos
-    const telhaSelecionada = telhas.find(t => String(t.telha_id || t.id) === String(form.telha_id));
-    if (!telhaSelecionada) {
-      setMensagem('Telha não encontrada');
-      return;
-    }
-    const payload = {
-      telha_id: telhaSelecionada.telha_id || telhaSelecionada.id,
-      quantidade: Number(form.quantidade)
-    };
-    try {
-      const res = await axios.patch('http://localhost:3001/investimentos/quantidade', payload);
-      setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
-    } catch (err) {
-      setMensagem('Erro ao atualizar estoque');
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const payload = {
+    telha_id: form.telha_id,
+    regiao_id: form.regiao_id,
+    quantidade: Number(form.quantidade)
   };
+  try {
+    const rota = tipo === 'investimento'
+      ? 'http://localhost:3001/investimentos/quantidade'
+      : 'http://localhost:3001/revenda/quantidade';
+
+    const res = await axios.patch(rota, payload);
+    setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
+  } catch (err) {
+    setMensagem(`Erro ao atualizar estoque de ${tipo}`);
+  }
+};
 
   const regiaoOptions = regioes.map(r => ({
     key: r.regiao_id || r.id,

@@ -27,20 +27,19 @@ const FormInvestimentoEstoque = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!telhaId || !quantidade) {
-      setMensagem('Selecione a telha e informe a quantidade.');
-      return;
-    }
+    const payload = {
+      telha_id: telhaId,
+      regiao_id: telhas.find(t => String(t.telha_id || t.id) === String(telhaId))?.regiao_id,
+      quantidade: Number(quantidade)
+    };
     try {
-      await axios.patch('http://localhost:3001/investimentos/quantidade', {
-        telha_id: telhaId,
-        quantidade: Number(quantidade)
-      });
-      setMensagem('Estoque de investimento atualizado com sucesso!');
+      const res = await axios.patch('http://localhost:3001/investimentos/quantidade', payload);
+      setMensagem(res.data.mensagem || 'Estoque de investimento atualizado com sucesso!');
       setAtualizar(a => !a);
       setQuantidade('');
+      setTimeout(() => setMensagem(''), 3000); // Limpa mensagem após 3s
     } catch (err) {
-      setMensagem('Erro ao atualizar estoque');
+      setMensagem('Erro ao atualizar estoque de investimento');
     }
   };
 
