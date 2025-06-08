@@ -12,7 +12,6 @@ const FormEstoque = ({ tipo }) => {
   const [mensagem, setMensagem] = useState('');
   const [regioes, setRegioes] = useState([]);
   const [telhas, setTelhas] = useState([]);
-  const [preco, setPreco] = useState(null);
 
   useEffect(() => {
     axios.get('http://localhost:3001/regioes')
@@ -34,18 +33,6 @@ const FormEstoque = ({ tipo }) => {
     }
   }, [form.regiao_id, tipo]);
 
-  useEffect(() => {
-    if (form.telha_id) {
-      const telha = telhas.find(t => String(t.id) === String(form.telha_id));
-      if (tipo === 'investimento') {
-        setPreco(telha?.preco_compra || null);
-      } else {
-        setPreco(telha?.preco_revenda || null);
-      }
-    } else {
-      setPreco(null);
-    }
-  }, [form.telha_id, telhas, tipo]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -55,25 +42,29 @@ const FormEstoque = ({ tipo }) => {
     setForm({ ...form, [name]: value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const payload = {
-    telha_id: form.telha_id,
-    regiao_id: form.regiao_id,
-    quantidade: Number(form.quantidade)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Busca a telha selecionada na revenda
+    const telhaRevenda = telhas.find(t => String(t.telha_id || t.id) === String(form.telha_id));
+    if (!telhaRevenda) {
+      setMensagem('Telha não encontrada para a região selecionada.');
+      return;
+    }
+    const payload = {
+      id: telhaRevenda.id, // id da revenda
+      regiao_id: form.regiao_id,
+      telha_id: telhaRevenda.telha_id || telhaRevenda.id, // pode ser string ou number
+      quantidade: Number(form.quantidade)
+    };
+    try {
+      const res = await axios.patch('http://localhost:3001/revenda/quantidade', payload);
+      setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
+    } catch (err) {
+      setMensagem(err.response?.data?.message || err.response?.data?.mensagem || 'Erro ao atualizar estoque de revenda');
+    }
   };
-  try {
-    const rota = tipo === 'investimento'
-      ? 'http://localhost:3001/investimentos/quantidade'
-      : 'http://localhost:3001/revenda/quantidade';
 
-    const res = await axios.patch(rota, payload);
-    setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
-  } catch (err) {
-    setMensagem(`Erro ao atualizar estoque de ${tipo}`);
-  }
-};
-
+  // Busca a telha selecionada
   const regiaoOptions = regioes.map(r => ({
     key: r.regiao_id || r.id,
     value: r.regiao_id || r.id,
@@ -86,12 +77,7 @@ const handleSubmit = async (e) => {
   }));
   return (
     <Segment style={{ maxWidth: 400, margin: '2rem auto', background: '#f9fafb', borderRadius: 8, boxShadow: '0 2px 8px #0001', backgroundColor: 'black' }}>
-      {preco !== null && (
-        <Message info>
-          {tipo === 'investimento' ? 'Preço de compra: R$ ' : 'Preço de revenda: R$ '}
-          {Number(preco).toFixed(2)}
-        </Message>
-      )}
+      <h3 style={{color: 'white'}}>{tipo === 'investimento' ? 'Atualizar Estoque de Investimento' : 'Atualizar Estoque de Revenda'}</h3>
       <UIForm onSubmit={handleSubmit} style={{ maxWidth: 400, margin: '0 auto' }}>
         <UIForm.Field required>
           <label style={{ color: 'white' }}>Região</label>
@@ -111,10 +97,9 @@ const handleSubmit = async (e) => {
             placeholder="Selecione a Telha"
             fluid
             selection
-            options={telhaOptions}
-            name="telha_id"
+            options={telhaOptions.map(opt => ({ key: String(opt.key), value: String(opt.value), text: opt.text }))}
             value={form.telha_id}
-            onChange={(_, data) => handleDropdownChange('telha_id', data.value)}
+            onChange={(_, data) => handleChange({ target: { name: 'telha_id', value: data.value } })}
             disabled={!form.regiao_id}
           />
         </UIForm.Field>

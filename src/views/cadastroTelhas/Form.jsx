@@ -12,8 +12,6 @@ const Form = () => {
   const [mensagem, setMensagem] = useState('');
   const [regioes, setRegioes] = useState([]);
   const [telhas, setTelhas] = useState([]);
-  const [precoCompra, setPrecoCompra] = useState(null);
-  const [precoRevenda, setPrecoRevenda] = useState(null);
 
   useEffect(() => {
     // Buscar regiões
@@ -81,11 +79,6 @@ const Form = () => {
 
   return (
     <>
-      {precoRevenda !== null && (
-        <Message info>
-          Preço de revenda: R$ {Number(precoRevenda).toFixed(2)}
-        </Message>
-      )}
       <UIForm onSubmit={handleSubmit} style={{maxWidth: 400, margin: '0 auto'}}>
         <UIForm.Field required>
           <label>Região</label>

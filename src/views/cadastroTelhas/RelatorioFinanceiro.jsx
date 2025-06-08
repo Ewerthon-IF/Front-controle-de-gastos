@@ -21,16 +21,23 @@ function RelatorioFinanceiro() {
   }, []);
 
   if (loading) return <p>Carregando relatório...</p>;
-  if (!Array.isArray(relatorio) || relatorio.length === 0) return <p>Relatório indisponível.</p>;
+  if (!Array.isArray(relatorio) || relatorio.length === 0)
+    return (
+      <div style={{ maxWidth: '1000px', margin: '2rem auto', textAlign: 'center', background: '#222', borderRadius: 10, padding: 24 }}>
+        <h3>Relatório Financeiro</h3>
+        <p style={{ color: '#f00' }}>Relatório indisponível.</p>
+      </div>
+    );
 
   return (
     <div style={{ maxWidth: '1000px', margin: '2rem auto', textAlign: 'left', background: '#222', color: '#fff', borderRadius: 10, padding: 24 }}>
       <h3>Relatório Financeiro</h3>
       <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 40 }}>
-        <div style={{ flex: 1, minWidth: 350 }}>
+        <div style={{ flex: 1, minWidth: 350, textAlign: 'left' }}>
           <h4 style={{ color: '#ffd700' }}>Relatório de Compras</h4>
           {relatorio.filter(item => item.movimentacoes.some(mov => mov.tipo === 'compra')).map((item, idx) => (
-            <div key={'compra-' + item.nomeTelha + '-' + idx} style={{ marginBottom: 32, padding: 16, background: '#333', borderRadius: 8, boxShadow: '0 2px 8px #0001', color: '#fff' }}>
+            <div key={'compra-' + item.regiao + '-' + item.nomeTelha + '-' + idx} style={{ marginBottom: 32, padding: 16, background: '#333', borderRadius: 8, boxShadow: '0 2px 8px #0001', color: '#fff' }}>
+              <h4>Região: {item.regiao}</h4>
               <p><strong>Telha:</strong> {item.nomeTelha}</p>
               <p><strong>Total Gasto:</strong> {Number(item.totalGasto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
               <h5>Movimentações:</h5>
@@ -38,14 +45,15 @@ function RelatorioFinanceiro() {
                 <thead>
                   <tr>
                     <th>Tipo</th>
-                    <th style={{ textAlign: 'start' }}>Quant</th>
+                    <th>Quant</th>
                     <th>Preço</th>
                     <th>Data</th>
                   </tr>
                 </thead>
+                <br />
                 <tbody>
                   {item.movimentacoes.filter(mov => mov.tipo === 'compra').map((mov, i) => (
-                    <tr key={'compra-' + mov.data + '-' + i}>
+                    <tr key={'compra-' + mov.data + '-' + i} style={{ height: 40 }}>
                       <td style={{ paddingBottom: 24 }}>{mov.tipo}</td>
                       <td style={{ paddingBottom: 24, paddingLeft: 24 }}>{mov.quantidade}</td>
                       <td style={{ paddingBottom: 24 }}>{Number(mov.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>

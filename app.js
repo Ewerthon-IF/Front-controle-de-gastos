@@ -62,27 +62,40 @@ app.patch('/investimentos/quantidade', (req, res) => {
   db.query(
     'UPDATE investimentos SET quantidade = quantidade + ? WHERE telha_id = ? AND regiao_id = ?',
     [quantidade, telha_id, regiao_id],
-    (err, result) => {
+    (err) => {
       if (err) return res.status(500).json({ mensagem: 'Erro ao atualizar estoque de investimento' });
       return res.json({ mensagem: 'Estoque de investimento atualizado com sucesso!' });
     }
   );
 });
 
-// PATCH para atualizar estoque de revenda
+// PATCH para atualizar estoque de revenda (venda)
 app.patch('/revenda/quantidade', (req, res) => {
   const { telha_id, regiao_id, quantidade } = req.body;
   if (!telha_id || !regiao_id || quantidade === undefined) {
     return res.status(400).json({ mensagem: 'Dados incompletos' });
   }
-  db.query(
-    'UPDATE revendas SET quantidade = quantidade + ? WHERE telha_id = ? AND regiao_id = ?',
-    [quantidade, telha_id, regiao_id],
-    (err, result) => {
-      if (err) return res.status(500).json({ mensagem: 'Erro ao atualizar estoque de revenda' });
-      return res.json({ mensagem: 'Estoque de revenda atualizado com sucesso!' });
-    }
-  );
+  // Buscar atributos da telha selecionada
+  db.query('SELECT nome_telha, cor, comprimento, largura FROM revendas WHERE telha_id = ? AND regiao_id = ?', [telha_id, regiao_id], (err, results) => {
+    if (err || !results.length) return res.status(400).json({ mensagem: 'Telha de revenda não encontrada para a região.' });
+    const { nome_telha, cor, comprimento, largura } = results[0];
+    // Buscar investimento central (sem filtrar por região)
+    db.query('SELECT quantidade FROM investimentos WHERE nome_telha = ? AND cor = ? AND comprimento = ? AND largura = ?', [nome_telha, cor, comprimento, largura], (err2, invs) => {
+      if (err2 || !invs.length) return res.status(400).json({ mensagem: 'Investimento não encontrado para a telha informada.' });
+      if (invs[0].quantidade < quantidade) {
+        return res.status(400).json({ mensagem: 'Estoque de investimento insuficiente. Estoque atual: ' + invs[0].quantidade + ', solicitado: ' + quantidade });
+      }
+      // Subtrai do investimento central
+      db.query('UPDATE investimentos SET quantidade = quantidade - ? WHERE nome_telha = ? AND cor = ? AND comprimento = ? AND largura = ?', [quantidade, nome_telha, cor, comprimento, largura], (err3) => {
+        if (err3) return res.status(500).json({ mensagem: 'Erro ao atualizar estoque de investimento' });
+        // Soma na revenda da região correta
+        db.query('UPDATE revendas SET quantidade = quantidade + ? WHERE telha_id = ? AND regiao_id = ?', [quantidade, telha_id, regiao_id], (err4) => {
+          if (err4) return res.status(500).json({ mensagem: 'Erro ao atualizar estoque de revenda' });
+          return res.json({ mensagem: 'Venda registrada com sucesso! Estoque atualizado.' });
+        });
+      });
+    });
+  });
 });
 
 // GET relatório financeiro detalhado
@@ -94,10 +107,9 @@ app.get('/relatorios/financeiro', (req, res) => {
       // Agrupar por regiao e nomeTelha
       const relatorioMap = {};
       investimentos.forEach(inv => {
-        const key = `${inv.regiao_id}-${inv.nome_telha}`;
+        const key = `${inv.nome_telha}`;
         if (!relatorioMap[key]) {
           relatorioMap[key] = {
-            regiao: inv.regiao_id,
             nomeTelha: inv.nome_telha,
             totalGasto: 0,
             totalRecebido: 0,
