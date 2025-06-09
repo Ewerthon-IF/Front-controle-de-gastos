@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Button, Dropdown, Input, Message, Segment, Form as UIForm } from 'semantic-ui-react';
 
-const FormEstoque = ({ tipo }) => {
+const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
   const [form, setForm] = useState({
     telha_id: '',
     quantidade: '',
@@ -59,6 +59,10 @@ const FormEstoque = ({ tipo }) => {
     try {
       const res = await axios.patch('http://localhost:3001/revenda/quantidade', payload);
       setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
+      setTimeout(() => {
+        setMensagem('');
+        if (onEstoqueAtualizado) onEstoqueAtualizado();
+      }, 1500);
     } catch (err) {
       setMensagem(err.response?.data?.message || err.response?.data?.mensagem || 'Erro ao atualizar estoque de revenda');
     }
@@ -77,7 +81,7 @@ const FormEstoque = ({ tipo }) => {
   }));
   return (
     <Segment style={{ maxWidth: 400, margin: '2rem auto', background: '#f9fafb', borderRadius: 8, boxShadow: '0 2px 8px #0001', backgroundColor: 'black' }}>
-      <h3 style={{color: 'white'}}>{tipo === 'investimento' ? 'Atualizar Estoque de Investimento' : 'Atualizar Estoque de Revenda'}</h3>
+      <h3 style={{ color: 'white' }}>{tipo === 'investimento' ? 'Atualizar Estoque de Investimento' : 'Atualizar Estoque de Revenda'}</h3>
       <UIForm onSubmit={handleSubmit} style={{ maxWidth: 400, margin: '0 auto' }}>
         <UIForm.Field required>
           <label style={{ color: 'white' }}>Região</label>

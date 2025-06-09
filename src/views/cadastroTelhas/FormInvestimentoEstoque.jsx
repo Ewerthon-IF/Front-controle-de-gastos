@@ -34,12 +34,13 @@ const FormInvestimentoEstoque = () => {
     };
     try {
       const res = await axios.patch('http://localhost:3001/investimentos/quantidade', payload);
-      setMensagem(res.data.mensagem || 'Estoque de investimento atualizado com sucesso!');
-      setAtualizar(a => !a);
-      setQuantidade('');
-      setTimeout(() => setMensagem(''), 3000); // Limpa mensagem após 3s
+      setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
+      setTimeout(() => {
+        setMensagem('');
+        window.location.reload(); // Recarrega a página após atualização
+      }, 500);
     } catch (err) {
-      setMensagem('Erro ao atualizar estoque de investimento');
+      setMensagem(err.response?.data?.message || err.response?.data?.mensagem || 'Erro ao atualizar estoque de investimento');
     }
   };
 

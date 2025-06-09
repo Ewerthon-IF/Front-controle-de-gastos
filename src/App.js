@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import './App.css';
 import FormEstoque from './views/cadastroTelhas/FormEstoque';
 import FormInvestimentoEstoque from './views/cadastroTelhas/FormInvestimentoEstoque';
@@ -7,6 +8,15 @@ import RevendasList from './views/cadastroTelhas/RevendasList';
 
 
 function App() {
+  const relatorioRef = useRef();
+
+  // Função para atualizar o relatório dinamicamente
+  const atualizarRelatorio = () => {
+    if (relatorioRef.current && relatorioRef.current.fetchRelatorio) {
+      relatorioRef.current.fetchRelatorio();
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -18,11 +28,11 @@ function App() {
           <RevendasList />
         </div>
         <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap', justifyContent: 'center', color: '#333' }}>
-          <FormEstoque tipo="revenda" />
-          <FormInvestimentoEstoque />
+          <FormEstoque tipo="revenda" onEstoqueAtualizado={atualizarRelatorio} />
+          <FormInvestimentoEstoque onEstoqueAtualizado={atualizarRelatorio} />
         </div>
         <div style={{ margin: '2rem auto' }}>
-          <RelatorioFinanceiro />
+          <RelatorioFinanceiro ref={relatorioRef} />
         </div>
 
       </header>
