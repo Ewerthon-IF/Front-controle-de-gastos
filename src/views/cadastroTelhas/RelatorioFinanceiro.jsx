@@ -20,12 +20,16 @@ function RelatorioFinanceiro() {
     fetchRelatorio();
   }, []);
 
-  const zerarEstoqueVendas = async () => {
-    if (window.confirm('Tem certeza que deseja zerar o estoque de todas as vendas?')) {
-      await axios.post('http://localhost:3001/revenda/zerar-estoque');
-      fetchRelatorio();
+const zerarEstoqueVendas = async () => {
+  if (window.confirm('Tem certeza que deseja zerar todo o estoque e apagar o relatório financeiro?')) {
+    try {
+      await axios.post('http://localhost:3001/revenda/zerar-tudo');
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao zerar estoques e relatório financeiro:', error);
     }
-  };
+  }
+};
 
   if (loading) return <p>Carregando relatório...</p>;
   if (!Array.isArray(relatorio) || relatorio.length === 0)
@@ -49,7 +53,6 @@ function RelatorioFinanceiro() {
           flexWrap: 'wrap',
           justifyContent: 'space-between',
           marginBottom: 40,
-          flexDirection: window.innerWidth <= 700 ? 'column' : 'row',
         }}
       >
         <div style={{ flex: 1, minWidth: 350, textAlign: 'left' }}>
@@ -135,8 +138,8 @@ function RelatorioFinanceiro() {
         <div
           style={{
             display: 'flex',
-            flexWrap: window.innerWidth <= 700 ? 'wrap' : 'nowrap',
-            flexDirection: window.innerWidth <= 700 ? 'column' : 'row',
+            flexWrap: 'nowrap',
+            flexDirection: 'row',
             gap: 32,
             alignItems: 'stretch',
             justifyContent: 'space-between',

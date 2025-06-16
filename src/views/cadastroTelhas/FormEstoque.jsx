@@ -12,7 +12,6 @@ const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
   const [mensagem, setMensagem] = useState('');
   const [regioes, setRegioes] = useState([]);
   const [telhas, setTelhas] = useState([]);
-
   useEffect(() => {
     axios.get('http://localhost:3001/regioes')
       .then(res => setRegioes(res.data))
@@ -33,7 +32,6 @@ const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
     }
   }, [form.regiao_id, tipo]);
 
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -44,6 +42,10 @@ const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.quantidade || Number(form.quantidade) <= 0) {
+      setMensagem('Digite uma quantidade válida para atualizar o estoque.');
+      return;
+    }
     // Busca a telha selecionada na revenda
     const telhaRevenda = telhas.find(t => String(t.telha_id || t.id) === String(form.telha_id));
     if (!telhaRevenda) {
@@ -60,9 +62,8 @@ const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
       const res = await axios.patch('http://localhost:3001/revenda/quantidade', payload);
       setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
       setTimeout(() => {
-        setMensagem('');
-        if (onEstoqueAtualizado) onEstoqueAtualizado();
-      }, 1500);
+        window.location.reload();
+      }, 1200);
     } catch (err) {
       setMensagem(err.response?.data?.message || err.response?.data?.mensagem || 'Erro ao atualizar estoque de revenda');
     }
@@ -81,7 +82,6 @@ const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
   }));
   return (
     <Segment style={{ maxWidth: 400, margin: '2rem auto', background: '#f9fafb', borderRadius: 8, boxShadow: '0 2px 8px #0001', backgroundColor: 'black' }}>
-      <h3 style={{ color: 'white' }}>{tipo === 'investimento' ? 'Atualizar Estoque de Investimento' : 'Atualizar Estoque de Revenda'}</h3>
       <UIForm onSubmit={handleSubmit} style={{ maxWidth: 400, margin: '0 auto' }}>
         <UIForm.Field required>
           <label style={{ color: 'white' }}>Região</label>

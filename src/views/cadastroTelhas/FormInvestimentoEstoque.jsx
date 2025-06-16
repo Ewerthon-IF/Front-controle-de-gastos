@@ -8,13 +8,12 @@ const FormInvestimentoEstoque = () => {
   const [quantidade, setQuantidade] = useState('');
   const [mensagem, setMensagem] = useState('');
   const [precoCompra, setPrecoCompra] = useState(null);
-  const [atualizar, setAtualizar] = useState(false);
 
   useEffect(() => {
     axios.get('http://localhost:3001/investimentos')
       .then(res => setTelhas(res.data))
       .catch(() => setTelhas([]));
-  }, [atualizar]);
+  }, []);
 
   useEffect(() => {
     if (telhaId) {
