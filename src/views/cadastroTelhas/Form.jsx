@@ -15,7 +15,7 @@ const Form = () => {
 
   useEffect(() => {
     // Buscar regiões
-    axios.get('http://localhost:3001/regioes')
+    axios.get('https://back-controle-de-gastos-production.up.railway.app/regioes')
       .then(res => setRegioes(res.data))
       .catch(() => setRegioes([]));
   }, []);
@@ -23,7 +23,7 @@ const Form = () => {
   useEffect(() => {
     if (form.regiao_id) {
       // Buscar telhas de revenda por região
-      axios.get(`http://localhost:3001/revenda/regiao/${form.regiao_id}`)
+      axios.get(`https://back-controle-de-gastos-production.up.railway.app/revenda/regiao/${form.regiao_id}`)
         .then(res => setTelhas(res.data))
         .catch(() => setTelhas([]));
     } else {
@@ -58,7 +58,7 @@ const Form = () => {
       quantidade: Number(form.quantidade)
     };
     try {
-      const res = await axios.patch('http://localhost:3001/revenda/quantidade', payload);
+      const res = await axios.patch('https://back-controle-de-gastos-production.up.railway.app/revenda/quantidade', payload);
       setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
     } catch (err) {
       setMensagem('Erro ao atualizar estoque');

@@ -13,18 +13,18 @@ const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
   const [regioes, setRegioes] = useState([]);
   const [telhas, setTelhas] = useState([]);
   useEffect(() => {
-    axios.get('http://localhost:3001/regioes')
+    axios.get('https://back-controle-de-gastos-production.up.railway.app/regioes')
       .then(res => setRegioes(res.data))
       .catch(() => setRegioes([]));
   }, []);
 
   useEffect(() => {
     if (tipo === 'investimento') {
-      axios.get('http://localhost:3001/investimentos')
+      axios.get('https://back-controle-de-gastos-production.up.railway.app/investimentos')
         .then(res => setTelhas(res.data))
         .catch(() => setTelhas([]));
     } else if (form.regiao_id) {
-      axios.get(`http://localhost:3001/revenda/regiao/${form.regiao_id}`)
+      axios.get(`https://back-controle-de-gastos-production.up.railway.app/revenda/regiao/${form.regiao_id}`)
         .then(res => setTelhas(res.data))
         .catch(() => setTelhas([]));
     } else {
@@ -59,7 +59,7 @@ const FormEstoque = ({ tipo, onEstoqueAtualizado }) => {
       quantidade: Number(form.quantidade)
     };
     try {
-      const res = await axios.patch('http://localhost:3001/revenda/quantidade', payload);
+      const res = await axios.patch('https://back-controle-de-gastos-production.up.railway.app/revenda/quantidade', payload);
       setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
       setTimeout(() => {
         window.location.reload();

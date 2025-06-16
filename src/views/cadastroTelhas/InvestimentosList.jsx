@@ -7,7 +7,7 @@ const InvestimentosList = () => {
   const [erro, setErro] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3001/investimentos')
+    axios.get('https://back-controle-de-gastos-production.up.railway.app/investimentos')
       .then(res => setInvestimentos(res.data))
       .catch(() => setErro('Erro ao buscar investimentos'));
   }, []);

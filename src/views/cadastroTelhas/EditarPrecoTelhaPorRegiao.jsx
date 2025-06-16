@@ -11,12 +11,12 @@ function EditarPrecoTelhaPorRegiao() {
     const [mensagem, setMensagem] = useState('');
 
     useEffect(() => {
-        axios.get('http://localhost:3001/regioes').then(res => setRegioes(res.data));
+        axios.get('https://back-controle-de-gastos-production.up.railway.app/regioes').then(res => setRegioes(res.data));
     }, []);
 
     useEffect(() => {
         if (regiaoId) {
-            axios.get(`http://localhost:3001/revenda/regiao/${regiaoId}`).then(res => setTelhas(res.data));
+            axios.get(`https://back-controle-de-gastos-production.up.railway.app/revenda/regiao/${regiaoId}`).then(res => setTelhas(res.data));
         } else {
             setTelhas([]);
         }
@@ -55,7 +55,7 @@ function EditarPrecoTelhaPorRegiao() {
         };
 
         try {
-            await axios.patch('http://localhost:3001/revenda/preco', body);
+            await axios.patch('https://back-controle-de-gastos-production.up.railway.app/revenda/preco', body);
             setMensagem('Preço atualizado com sucesso!');
         } catch (err) {
             console.error(err);

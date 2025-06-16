@@ -9,7 +9,7 @@ function EditarPrecoTelhaInvestimento() {
   const [mensagem, setMensagem] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3001/investimentos').then(res => setTelhas(res.data));
+    axios.get('https://back-controle-de-gastos-production.up.railway.app/investimentos').then(res => setTelhas(res.data));
   }, []);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ function EditarPrecoTelhaInvestimento() {
       novoPreco: precoConvertido
     };
     try {
-      await axios.patch('http://localhost:3001/investimentos/preco', body);
+      await axios.patch('https://back-controle-de-gastos-production.up.railway.app/investimentos/preco', body);
       setMensagem('Preço atualizado com sucesso!');
     } catch (err) {
       setMensagem('Erro ao atualizar preço');

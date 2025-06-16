@@ -10,7 +10,7 @@ const FormInvestimentoEstoque = () => {
   const [precoCompra, setPrecoCompra] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/investimentos')
+    axios.get('https://back-controle-de-gastos-production.up.railway.app/investimentos')
       .then(res => setTelhas(res.data))
       .catch(() => setTelhas([]));
   }, []);
@@ -32,7 +32,7 @@ const FormInvestimentoEstoque = () => {
       quantidade: Number(quantidade)
     };
     try {
-      const res = await axios.patch('http://localhost:3001/investimentos/quantidade', payload);
+      const res = await axios.patch('https://back-controle-de-gastos-production.up.railway.app/investimentos/quantidade', payload);
       setMensagem(res.data.mensagem || 'Estoque atualizado com sucesso!');
       setTimeout(() => {
         setMensagem('');

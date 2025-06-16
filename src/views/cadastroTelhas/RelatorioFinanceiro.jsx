@@ -8,7 +8,7 @@ function RelatorioFinanceiro() {
   const fetchRelatorio = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:3001/relatorios/financeiro');
+      const res = await axios.get('https://back-controle-de-gastos-production.up.railway.app/relatorios/financeiro');
       setRelatorio(res.data.relatorio || res.data || []);
     } catch {
       setRelatorio([]);
@@ -23,7 +23,7 @@ function RelatorioFinanceiro() {
 const zerarEstoqueVendas = async () => {
   if (window.confirm('Tem certeza que deseja zerar todo o estoque e apagar o relatório financeiro?')) {
     try {
-      await axios.post('http://localhost:3001/revenda/zerar-tudo');
+      await axios.post('https://back-controle-de-gastos-production.up.railway.app/revenda/zerar-tudo');
       window.location.reload();
     } catch (error) {
       console.error('Erro ao zerar estoques e relatório financeiro:', error);

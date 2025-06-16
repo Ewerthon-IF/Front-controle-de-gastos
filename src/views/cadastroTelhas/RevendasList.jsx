@@ -9,14 +9,14 @@ const RevendasList = () => {
   const [erro, setErro] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3001/regioes')
+    axios.get('https://back-controle-de-gastos-production.up.railway.app/regioes')
       .then(res => setRegioes(res.data))
       .catch(() => setRegioes([]));
   }, []);
 
   useEffect(() => {
     if (regiaoId) {
-      axios.get(`http://localhost:3001/revenda/regiao/${regiaoId}`)
+      axios.get(`https://back-controle-de-gastos-production.up.railway.app/revenda/regiao/${regiaoId}`)
         .then(res => setRevendas(res.data))
         .catch(() => setErro('Erro ao buscar revendas'));
     } else {
